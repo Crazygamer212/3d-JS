@@ -10,9 +10,9 @@
 <canvas  id="canvas" width="1280" height="720" style="border:1px solid #000000;"></canvas> onmousemove="moveM(event)"
 
 <div class="slidecontainer">
-    <p>X rot:</p><input type="range" min="0" max="360" value="50" class="slider" id="xRot">
-    <p>Y rot:</p><input type="range" min="0" max="360" value="50" class="slider" id="yRot">
-    <p>Z rot:</p><input type="range" min="0" max="360" value="50" class="slider" id="zRot">
+    <p>X rot:</p><input type="range" min="0" max="360" value="0" class="slider" id="xRot">
+    <p>Y rot:</p><input type="range" min="0" max="360" value="0" class="slider" id="yRot">
+    <p>Z rot:</p><input type="range" min="0" max="360" value="0" class="slider" id="zRot">
   </div>
 
 </body>
@@ -109,10 +109,16 @@
 
     function point3d(x,y,z){
         var zRotCRad = zRotC * Math.PI / 180; // Convert to radians
-        
+        var xRotCRad = xRotC * Math.PI / 180; // Convert to radians
+        var yRotCRad = yRotC * Math.PI / 180; // Convert to radians
 
         var TransX = (Math.cos(zRotCRad)*x) + (Math.sin(zRotCRad)*y);
         var TransY = (Math.cos(zRotCRad)*y) - (Math.sin(zRotCRad)*x);
+
+        var TransX = (Math.cos(yRotCRad)*TransX) + (Math.sin(yRotCRad)*z);
+        var TransY = (Math.cos(xRotCRad)*TransY) - (Math.sin(xRotCRad)*z);
+
+
         //console.log(TransY,TransX);
         point2d(TransY+Math.floor(canvas.width/2),TransX+Math.floor(canvas.height/2));
     }
@@ -127,14 +133,14 @@ zRotC = document.getElementById("zRot").value;
 point2d(Math.floor(canvas.width/2),Math.floor(canvas.height/2))
 
 point3d(1*30,1*30,1*30);
-point3d(2*30,1*30,1*30);
-point3d(2*30,2*30,1*30);
-point3d(1*30,2*30,1*30);
+point3d(-1*30,1*30,1*30);
+point3d(-1*30,-1*30,1*30);
+point3d(1*30,-1*30,1*30);
 
-point3d(1*30,1*30,2*30);
-point3d(2*30,1*30,2*30);
-point3d(2*30,2*30,2*30);
-point3d(1*30,2*30,2*30);
+point3d(1*30,1*30,-1*30);
+point3d(-1*30,1*30,-1*30);
+point3d(-1*30,-1*30,-1*30);
+point3d(1*30,-1*30,-1*30);
 
 }
 
