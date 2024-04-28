@@ -1,0 +1,145 @@
+<html>
+
+<head>
+    
+</head>
+
+
+<body>
+
+<canvas  id="canvas" width="1280" height="720" style="border:1px solid #000000;"></canvas> onmousemove="moveM(event)"
+
+<div class="slidecontainer">
+    <p>X rot:</p><input type="range" min="0" max="360" value="50" class="slider" id="xRot">
+    <p>Y rot:</p><input type="range" min="0" max="360" value="50" class="slider" id="yRot">
+    <p>Z rot:</p><input type="range" min="0" max="360" value="50" class="slider" id="zRot">
+  </div>
+
+</body>
+<script>
+    // Get the canvas element
+    var canvas = document.getElementById("canvas");
+    // Get the 2D rendering context
+    var context = canvas.getContext("2d");
+
+    // Set the pixel color
+    var id = context.createImageData(1,1); // only do this once per page
+    var d  = id.data;                        // only do this once per page
+    var x = 0;
+    var y = 0;
+    var z = 0;
+
+    var xRotC = document.getElementById("xRot");
+    var yRotC = document.getElementById("yRot");
+    var zRotC = document.getElementById("zRot");
+
+
+
+
+    /*function moveM(e){
+        x = e.clientX;
+        y = e.clientY;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        point(x,y)
+    }
+    */
+
+    function line(x1, y1, x2, y2) {
+        var Xdif = x2 - x1;
+        var Ydif = y2 - y1;
+
+        // Calculate the slope and offset for the line
+        var slope = Ydif / Xdif;
+        var offset = y1 - (slope * x1);
+
+        // Ensure we don't divide by zero
+        if (Xdif === 0) {
+            // Handle vertical line
+            for (let i = Math.min(y1, y2); i <= Math.max(y1, y2); i++) {
+                d[0] = 256;
+                d[1] = 0;
+                d[2] = 0;
+                d[3] = 256;
+                context.putImageData(id, x1, i);
+            }
+        } else {
+            // Handle non-vertical line
+            if (Math.abs(Xdif) > Math.abs(Ydif)){
+            var startX = x1 < x2 ? x1 : x2;
+            var endX = x1 > x2 ? x1 : x2;
+            for (let i = startX; i <= endX; i++) {
+                var y = Math.round(slope * i + offset);
+                d[0] = 256;
+                d[1] = 0;
+                d[2] = 0;
+                d[3] = 256;
+                context.putImageData(id, i, y);
+            }
+            
+            }
+            else{
+            var startY = y1 < y2 ? y1 : y2;
+            var endY = y1 > y2 ? y1 : y2;
+            for (let i = startY; i <= endY; i++) {
+                var x = Math.round( (i - offset)/slope);
+                d[0] = 256;
+                d[1] = 0;
+                d[2] = 0;
+                d[3] = 256;
+                context.putImageData(id, x, i);
+        
+            }
+        }
+    }
+}
+
+    function point2d(x,y){
+        d[0]   = 256;
+        d[1]   = 0;
+        d[2]   = 0;
+        d[3]   = 256;
+        for (let i = x-3; i < x+3; i++){
+            for (let p = y-3; p < y+3; p++){
+                context.putImageData( id, i, p );   
+            }
+        }
+        
+    }
+
+
+    function point3d(x,y,z){
+        var zRotCRad = zRotC * Math.PI / 180; // Convert to radians
+        
+
+        var TransX = (Math.cos(zRotCRad)*x) + (Math.sin(zRotCRad)*y);
+        var TransY = (Math.cos(zRotCRad)*y) - (Math.sin(zRotCRad)*x);
+        //console.log(TransY,TransX);
+        point2d(TransY+Math.floor(canvas.width/2),TransX+Math.floor(canvas.height/2));
+    }
+
+function main(){
+context.clearRect(0, 0, canvas.width, canvas.height);
+
+xRotC = document.getElementById("xRot").value;
+yRotC = document.getElementById("yRot").value;
+zRotC = document.getElementById("zRot").value;
+
+point2d(Math.floor(canvas.width/2),Math.floor(canvas.height/2))
+
+point3d(1*30,1*30,1*30);
+point3d(2*30,1*30,1*30);
+point3d(2*30,2*30,1*30);
+point3d(1*30,2*30,1*30);
+
+point3d(1*30,1*30,2*30);
+point3d(2*30,1*30,2*30);
+point3d(2*30,2*30,2*30);
+point3d(1*30,2*30,2*30);
+
+}
+
+    
+    setInterval(main, 17);
+
+</script>
+</html>
