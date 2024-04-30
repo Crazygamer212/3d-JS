@@ -10,12 +10,19 @@
 <canvas  id="canvas" width="1280" height="720" style="border:1px solid #000000;"></canvas> onmousemove="moveM(event)"
 
 <div class="slidecontainer">
-    <p>X rot:</p><input type="range" min="0" max="360" value="0" class="slider" id="xRot">
-    <p>Y rot:</p><input type="range" min="0" max="360" value="0" class="slider" id="yRot">
-    <p>Z rot:</p><input type="range" min="0" max="360" value="0" class="slider" id="zRot">
+    <p>X rot: <input type="range" min="0" max="360" value="0" class="slider" id="xRot">    X pos: <input type="range" min="-100" max="100" value="0" class="slider" id="xPos"></p>
+    <p>Y rot: <input type="range" min="0" max="360" value="0" class="slider" id="yRot">    Y pos: <input type="range" min="-100" max="100" value="0" class="slider" id="yPos"></p>
+    <p>Z rot: <input type="range" min="0" max="360" value="0" class="slider" id="zRot">    Z pos: <input type="range" min="-100" max="100" value="0" class="slider" id="zPos"></p>
+	
+	
+	
+	
   </div>
 
 </body>
+
+
+
 <script>
     // Get the canvas element
     var canvas = document.getElementById("canvas");
@@ -25,14 +32,17 @@
     // Set the pixel color
     var id = context.createImageData(1,1); // only do this once per page
     var d  = id.data;                        // only do this once per page
+
+    var FP = 100
+
     var x = 0;
     var y = 0;
     var z = 0;
 
-    var xRotC = document.getElementById("xRot");
-    var yRotC = document.getElementById("yRot");
-    var zRotC = document.getElementById("zRot");
 
+
+    var RotC = ([document.getElementById("xRot").value*0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789, document.getElementById("yRot").value*0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789, document.getElementById("zRot").value*0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789]);
+	var PosC = ([parseFloat(document.getElementById("xPos").value), parseFloat(document.getElementById("yPos").value), parseFloat(document.getElementById("zPos").value)]);
 
 
 
@@ -43,6 +53,38 @@
         point(x,y)
     }
     */
+	
+	
+	
+	function RotX(theta, Pvec){
+		var sine = Math.sin(theta);
+		var cosn = Math.cos(theta);
+		var Xn = Pvec[0];
+		var Yn = (cosn*Pvec[1]) + (sine*Pvec[2]);
+		var Zn = (-sine*Pvec[1]) + (cosn*Pvec[2]);
+		return([Xn,Yn,Zn]);
+	}
+	
+	function RotY(theta, Pvec){
+		var sine = Math.sin(theta);
+		var cosn = Math.cos(theta);
+		var Xn = (cosn*Pvec[0])-(sine*Pvec[2]);
+		var Yn = Pvec[1];
+		var Zn = (sine*Pvec[0]) + (cosn*Pvec[2]);
+		return([Xn,Yn,Zn]);
+	}
+	
+	function RotZ(theta, Pvec){
+		var sine = Math.sin(theta);
+		var cosn = Math.cos(theta);
+		var Xn = (cosn*Pvec[0]) + (sine*Pvec[1]);
+		var Yn = (cosn*Pvec[1])- (sine*Pvec[0]);
+		var Zn = Pvec[2];
+		return([Xn,Yn,Zn]);
+	}
+
+
+
 
     function line(x1, y1, x2, y2) {
         var Xdif = x2 - x1;
@@ -107,45 +149,46 @@
     }
 
 
-    function point3d(x,y,z){
-        var zRotCRad = zRotC * Math.PI / 180; // Convert to radians
-        var xRotCRad = xRotC * Math.PI / 180; // Convert to radians
-        var yRotCRad = yRotC * Math.PI / 180; // Convert to radians
-
-        var TransX = (Math.cos(zRotCRad)*x) + (Math.sin(zRotCRad)*y);
-        var TransY = (Math.cos(zRotCRad)*y) - (Math.sin(zRotCRad)*x);
-
-        var TransX = (Math.cos(yRotCRad)*TransX) + (Math.sin(yRotCRad)*z);
-        var TransY = (Math.cos(xRotCRad)*TransY) - (Math.sin(xRotCRad)*z);
-
-
+    function point3d(Pvec){
+        
+        var Pvec = [Pvec[0]+PosC[0],Pvec[1]+PosC[1],Pvec[2]+PosC[2]]; //camera offset
+        console.log(PosC[0], PosC[1], PosC[2]);
+        
+		var arr = RotX(RotC[0],Pvec);
+		
+		var arr = RotY(RotC[1],arr);
+		
+		var arr = RotZ(RotC[2],arr);
+		
+		
         //console.log(TransY,TransX);
-        point2d(TransY+Math.floor(canvas.width/2),TransX+Math.floor(canvas.height/2));
+		if (arr[2] > 0){ // dont render behind cam
+        point2d((arr[0] * (FP/arr[2])+Math.floor(canvas.width/2)) ,(arr[1] * (FP/arr[2])) + Math.floor(canvas.height/2) ); // div z for perspective
+		}
     }
 
 function main(){
 context.clearRect(0, 0, canvas.width, canvas.height);
 
-xRotC = document.getElementById("xRot").value;
-yRotC = document.getElementById("yRot").value;
-zRotC = document.getElementById("zRot").value;
+	RotC = ([document.getElementById("xRot").value*0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789, document.getElementById("yRot").value*0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789, document.getElementById("zRot").value*0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789]);
+	PosC = ([parseFloat(document.getElementById("xPos").value), parseFloat(document.getElementById("yPos").value), parseFloat(document.getElementById("zPos").value)]);
 
 point2d(Math.floor(canvas.width/2),Math.floor(canvas.height/2))
 
-point3d(1*30,1*30,1*30);
-point3d(-1*30,1*30,1*30);
-point3d(-1*30,-1*30,1*30);
-point3d(1*30,-1*30,1*30);
+point3d([1*30,1*30,1*30]);
+point3d([2*30,1*30,1*30]);
+point3d([2*30,2*30,1*30]);
+point3d([1*30,2*30,1*30]);
 
-point3d(1*30,1*30,-1*30);
-point3d(-1*30,1*30,-1*30);
-point3d(-1*30,-1*30,-1*30);
-point3d(1*30,-1*30,-1*30);
+point3d([1*30,1*30,2*30]);
+point3d([2*30,1*30,2*30]);
+point3d([2*30,2*30,2*30]);
+point3d([1*30,2*30,2*30]);
 
 }
 
     
-    setInterval(main, 17);
+    setInterval(main, 16.6666);
 
 </script>
 </html>
